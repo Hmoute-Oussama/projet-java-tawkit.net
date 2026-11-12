@@ -1,0 +1,138 @@
+# city database: country | city | latitude | longitude | timezone offset hours
+Morocco|Casablanca|33.5731|-7.5898|1
+Morocco|Rabat|34.0209|-6.8416|1
+Morocco|Marrakesh|31.6295|-7.9811|1
+Morocco|Fès|34.0331|-5.0003|1
+Morocco|Tangier|35.7595|-5.834|1
+Morocco|Agadir|30.4278|-9.5981|1
+Morocco|Meknès|33.8935|-5.5473|1
+Morocco|Oujda|34.6867|-1.9114|1
+Morocco|Kenitra|34.261|-6.5802|1
+Morocco|Tetouan|35.5785|-5.3684|1
+Morocco|Salé|34.0531|-6.7985|1
+Morocco|Safi|32.2994|-9.2372|1
+Morocco|El Jadida|33.2316|-8.5007|1
+Morocco|Nador|35.1681|-2.9287|1
+Morocco|Beni Mellal|32.3373|-6.3498|1
+Morocco|Essaouira|31.5085|-9.7595|1
+Morocco|Ouarzazate|30.9189|-6.8934|1
+Morocco|Dakhla|23.6848|-15.9579|1
+Morocco|Laâyoune|27.1253|-13.1625|1
+Algeria|Algiers|36.7538|3.0588|1
+Algeria|Oran|35.6971|-0.6308|1
+Algeria|Constantine|36.365|6.6147|1
+Algeria|Annaba|36.9|7.7667|1
+Tunisia|Tunis|36.8065|10.1815|1
+Tunisia|Sfax|34.7406|10.7603|1
+Tunisia|Sousse|35.8256|10.6084|1
+Libya|Tripoli|32.8872|13.1913|2
+Egypt|Cairo|30.0444|31.2357|2
+Egypt|Alexandria|31.2001|29.9187|2
+Saudi Arabia|Makkah|21.3891|39.8579|3
+Saudi Arabia|Madina|24.5247|39.5692|3
+Saudi Arabia|Riyadh|24.7136|46.6753|3
+Saudi Arabia|Jeddah|21.4858|39.1925|3
+Saudi Arabia|Dammam|26.4207|50.0888|3
+Saudi Arabia|Khobar|26.2794|50.21|3
+Saudi Arabia|Tabuk|28.3835|36.5662|3
+Saudi Arabia|Abha|18.2465|42.5117|3
+United Arab Emirates|Dubai|25.2048|55.2708|4
+United Arab Emirates|Abu Dhabi|24.4539|54.3773|4
+United Arab Emirates|Sharjah|25.3463|55.4209|4
+Qatar|Doha|25.2854|51.531|3
+Kuwait|Kuwait City|29.3759|47.9774|3
+Bahrain|Manama|26.2285|50.586|3
+Oman|Muscat|23.588|58.3829|4
+Yemen|Sanaa|15.3694|44.191|3
+Jordan|Amman|31.9454|35.9284|3
+Syria|Damascus|33.5138|36.2765|3
+Lebanon|Beirut|33.8938|35.5018|3
+Palestine|Jerusalem|31.7683|35.2137|2
+Palestine|Gaza|31.5017|34.4668|2
+Iraq|Baghdad|33.3152|44.3661|3
+Turkey|Istanbul|41.0082|28.9784|3
+Turkey|Ankara|39.9334|32.8597|3
+France|Paris|48.8566|2.3522|1
+France|Marseille|43.2965|5.3698|1
+France|Lyon|45.764|4.8357|1
+France|Toulouse|43.6047|1.4442|1
+France|Lille|50.6292|3.0573|1
+France|Bordeaux|44.8378|-0.5792|1
+France|Strasbourg|48.5734|7.7521|1
+France|Nice|43.7102|7.262|1
+Spain|Madrid|40.4168|-3.7038|1
+Spain|Barcelona|41.3874|2.1686|1
+Germany|Berlin|52.52|13.405|1
+Germany|Frankfurt|50.1109|8.6821|1
+Germany|Cologne|50.9375|6.9603|1
+United Kingdom|London|51.5074|-0.1278|0
+United Kingdom|Birmingham|52.4862|-1.9904|0
+Belgium|Brussels|50.8503|4.3517|1
+Belgium|Antwerp|51.2194|4.4025|1
+Netherlands|Amsterdam|52.3676|4.9041|1
+Netherlands|The Hague|52.0705|4.3007|1
+Italy|Rome|41.9028|12.4964|1
+Italy|Milan|45.4642|9.19|1
+Sweden|Stockholm|59.3293|18.0686|1
+Norway|Oslo|59.9139|10.7522|1
+Denmark|Copenhagen|55.6761|12.5683|1
+Switzerland|Zurich|47.3769|8.5417|1
+Switzerland|Geneva|46.2044|6.1432|1
+Austria|Vienna|48.2082|16.3738|1
+Poland|Warsaw|52.2297|21.0122|1
+Russia|Moscow|55.7558|37.6173|3
+United States|New York|40.7128|-74.006|-5
+United States|Chicago|41.8781|-87.6298|-6
+United States|Houston|29.7604|-95.3698|-6
+United States|Los Angeles|34.0522|-118.2437|-8
+United States|Detroit|42.3314|-83.0458|-5
+United States|Washington|38.9072|-77.0369|-5
+Canada|Toronto|43.6532|-79.3832|-5
+Canada|Montreal|45.5017|-73.5673|-5
+Canada|Vancouver|49.2827|-123.1207|-8
+Mexico|Mexico City|19.4326|-99.1332|-6
+Brazil|São Paulo|-23.5505|-46.6333|-3
+Senegal|Dakar|14.7167|-17.4677|0
+Senegal|Saint-Louis|16.0326|-16.4896|0
+Mali|Bamako|12.6392|-8.0029|0
+Ivory Coast|Abidjan|5.36|-4.0083|0
+Guinea|Conakry|9.6412|-13.5784|0
+Mauritania|Nouakchott|18.0735|-15.9582|0
+Niger|Niamey|13.5127|2.1128|1
+Nigeria|Lagos|6.5244|3.3792|1
+Nigeria|Kano|12.0022|8.592|1
+Ghana|Accra|5.6037|-0.187|0
+Cameroon|Douala|4.0511|9.7679|1
+Chad|N'Djamena|12.1348|15.0557|1
+Sudan|Khartoum|15.5007|32.5599|2
+Somalia|Mogadishu|2.0469|45.3182|3
+Ethiopia|Addis Ababa|9.03|38.74|3
+Kenya|Nairobi|-1.2921|36.8219|3
+Tanzania|Dar es Salaam|-6.7924|39.2083|3
+Uganda|Kampala|0.3476|32.5825|3
+Malaysia|Kuala Lumpur|3.139|101.6869|8
+Indonesia|Jakarta|-6.2088|106.8456|7
+Indonesia|Surabaya|-7.2575|112.7521|7
+Brunei|Bandar Seri Begawan|4.9031|114.9398|8
+Singapore|Singapore|1.3521|103.8198|8
+Thailand|Bangkok|13.7563|100.5018|7
+Pakistan|Karachi|24.8607|67.0011|5
+Pakistan|Lahore|31.5204|74.3587|5
+Pakistan|Islamabad|33.6844|73.0479|5
+India|Delhi|28.6139|77.209|5.5
+India|Mumbai|19.076|72.8777|5.5
+India|Hyderabad|17.385|78.4867|5.5
+Bangladesh|Dhaka|23.8103|90.4125|6
+Sri Lanka|Colombo|6.9271|79.8612|5.5
+Maldives|Malé|4.1755|73.5093|5
+Kazakhstan|Almaty|43.222|76.8512|6
+Uzbekistan|Tashkent|41.2995|69.2401|5
+Kyrgyzstan|Bishkek|42.8746|74.5698|6
+Azerbaijan|Baku|40.4093|49.8671|4
+Iran|Tehran|35.6892|51.389|3.5
+Afghanistan|Kabul|34.5553|69.2075|4.5
+China|Beijing|39.9042|116.4074|8
+China|Shanghai|31.2304|121.4737|8
+Japan|Tokyo|35.6762|139.6503|9
+Australia|Sydney|-33.8688|151.2093|10
+Australia|Melbourne|-37.8136|144.9631|10
