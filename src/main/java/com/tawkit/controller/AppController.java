@@ -55,11 +55,11 @@ public class AppController implements PrayerScheduler.Listener, WeatherService.L
 
     /** Starts the whole application. */
     public void start() {
-        applySettingsToFrame();
-        frame.setPrayerTimes(scheduler.getToday());
-
         scheduler = new PrayerScheduler(settings, calculator);
         scheduler.setListener(this);
+
+        applySettingsToFrame();
+        frame.setPrayerTimes(scheduler.getToday());
 
         if (settings.isWeatherEnabled() && settings.getLocation() != null) {
             weatherService.refreshAsync(settings.getLocation().getLatitude(),
