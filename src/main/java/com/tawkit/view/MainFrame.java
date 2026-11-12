@@ -6,144 +6,56 @@ import com.tawkit.model.prayer.DailyPrayerTimes;
 import com.tawkit.model.prayer.PrayerType;
 import com.tawkit.model.weather.WeatherData;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Locale;
 
 /**
- * Main application window, in the Tawkit kiosk style:
- *
- * <pre>
- *   [ mosque name ]                    [ weather ]
- *        [ big clock + dates ]
- *   [ next-prayer ring ]  [ prayer times grid ]
- *   [ content: verses/hadith/azkar or slides ]
- *   [ announcements ticker ]
- * </pre>
- *
- * Supports full-screen mode, screen dimming during prayer, background
- * themes/custom image, and RTL layout for Arabic.
+ * Main application window hosting the Tawkit dashboard screen.
+ * Supports full-screen kiosk mode (F11), screen dimming during prayer,
+ * custom background images, user slides overlay, and reminder alerts.
  */
 public class MainFrame extends JFrame {
 
-    private static final Color BG_COLOR = new Color(8, 16, 32);
-
-    private final JPanel root;                       // themed background
-    private final JLabel mosqueLabel;
-    private final ClockPanel clockPanel;
-    private final DatePanel datePanel;
-    private final WeatherPanel weatherPanel;
-    private final NextPrayerPanel nextPrayerPanel;
-    private final PrayerTimesPanel prayerTimesPanel;
-    private final ContentPanel contentPanel;
+    private final TawkitScreen screen;
     private final SlidesPanel slidesPanel;
-    private final TickerPanel tickerPanel;
+    private final CardLayout cards;
+    private final JPanel cardHolder;
 
     private final JComponent dimOverlay;
-    private final CardLayout contentCards;
-    private final JPanel contentHolder;
+    private final JLabel alertLabel;
+    private final Timer alertTimer;
 
     private boolean fullScreen = false;
-    private boolean ringBig = false;
-    private boolean use24HourMenu = true;
-    private Runnable settingsOpener;
-    private JLabel alertLabel;
-    private Timer alertTimer;
     private Rectangle savedBounds;
     private int savedExtendedState;
+    private Runnable settingsOpener;
 
     public MainFrame() {
-        super("Tawkit — Prayer Times");
+        super("Tawkit - Prayer Times");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        root = new BackgroundPanel();
-        root.setLayout(new BorderLayout(0, 0));
-        setContentPane(root);
+        screen = new TawkitScreen();
+        screen.setOnMenuClick(this::openSettings);
 
-        // ---- Header: mosque name, dates, weather ----
-        JPanel header = new JPanel(new BorderLayout(20, 0));
-        header.setOpaque(false);
-        header.setBorder(BorderFactory.createEmptyBorder(12, 20, 4, 20));
-
-        mosqueLabel = new JLabel("", SwingConstants.LEFT);
-        mosqueLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
-        mosqueLabel.setForeground(new Color(220, 228, 245));
-
-        datePanel = new DatePanel();
-        datePanel.setFontSizes(20);
-
-        weatherPanel = new WeatherPanel();
-
-        JPanel headerCenter = new JPanel(new BorderLayout(20, 0));
-        headerCenter.setOpaque(false);
-        headerCenter.add(datePanel, BorderLayout.WEST);
-        headerCenter.add(mosqueLabel, BorderLayout.CENTER);
-
-        header.add(headerCenter, BorderLayout.CENTER);
-        header.add(weatherPanel, BorderLayout.EAST);
-
-        // ---- Clock ----
-        clockPanel = new ClockPanel();
-        clockPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JPanel north = new JPanel();
-        north.setOpaque(false);
-        north.setLayout(new BoxLayout(north, BoxLayout.Y_AXIS));
-        north.add(header);
-        north.add(clockPanel);
-
-        // ---- Center: next-prayer ring + prayer grid ----
-        nextPrayerPanel = new NextPrayerPanel();
-        nextPrayerPanel.setPreferredSize(new Dimension(320, 260));
-        nextPrayerPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseClicked(java.awt.event.MouseEvent e) {
-                ringBig = !ringBig;
-                nextPrayerPanel.setBig(ringBig);   // click = enlarge, like Tawkit
-            }
-        });
-
-        prayerTimesPanel = new PrayerTimesPanel();
-        prayerTimesPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        JPanel center = new JPanel(new BorderLayout(20, 0));
-        center.setOpaque(false);
-        center.add(nextPrayerPanel, BorderLayout.WEST);
-        center.add(prayerTimesPanel, BorderLayout.CENTER);
-
-        // ---- South: content (verses / slides) + ticker ----
-        contentPanel = new ContentPanel();
         slidesPanel = new SlidesPanel(new File(System.getProperty("user.home"), ".tawkit/slides"));
 
-        contentCards = new CardLayout();
-        contentHolder = new JPanel(contentCards);
-        contentHolder.setOpaque(false);
-        contentHolder.add(contentPanel, "content");
-        contentHolder.add(slidesPanel, "slides");
+        cards = new CardLayout();
+        cardHolder = new JPanel(cards);
+        cardHolder.setOpaque(false);
+        cardHolder.add(screen, "screen");
+        cardHolder.add(slidesPanel, "slides");
+        setContentPane(cardHolder);
 
-        tickerPanel = new TickerPanel();
-
-        JPanel south = new JPanel(new BorderLayout());
-        south.setOpaque(false);
-        south.add(contentHolder, BorderLayout.CENTER);
-        south.add(tickerPanel, BorderLayout.SOUTH);
-
-        root.add(north, BorderLayout.NORTH);
-        root.add(center, BorderLayout.CENTER);
-        root.add(south, BorderLayout.SOUTH);
-
-        // ---- Dim overlay (glass pane) with 12s alert message ----
+        // ---- Dim overlay + 12s alert (glass pane) ----
         dimOverlay = new JComponent() {
             @Override
             protected void paintComponent(Graphics g) {
-                g.setColor(new Color(0, 0, 0, 170));
+                g.setColor(new Color(0, 0, 0, 175));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
         };
@@ -151,11 +63,11 @@ public class MainFrame extends JFrame {
         dimOverlay.setLayout(new BorderLayout());
 
         alertLabel = new JLabel("", SwingConstants.CENTER);
-        alertLabel.setFont(new Font("SansSerif", Font.BOLD, 34));
-        alertLabel.setForeground(new Color(255, 240, 180));
+        alertLabel.setFont(TawkitTheme.serif(Font.BOLD, 34));
+        alertLabel.setForeground(TawkitTheme.GOLDEN_BEIGE);
         alertLabel.setBorder(BorderFactory.createEmptyBorder(18, 40, 18, 40));
         alertLabel.setOpaque(true);
-        alertLabel.setBackground(new Color(20, 40, 30));
+        alertLabel.setBackground(new Color(10, 10, 10));
         JPanel alertWrapper = new JPanel(new GridBagLayout());
         alertWrapper.setOpaque(false);
         alertWrapper.add(alertLabel);
@@ -169,78 +81,38 @@ public class MainFrame extends JFrame {
 
         setGlassPane(dimOverlay);
 
-        buildMenuBar();
         installKeyBindings();
 
         setSize(1280, 720);
         setMinimumSize(new Dimension(800, 450));
         setLocationRelativeTo(null);
-        applyTheme("night");
-        datePanel.setGregorianDate(LocalDate.now());
-    }
-
-    private boolean isRingBig() {
-        return ringBig;
-    }
-
-    private void buildMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        JMenu fileMenu = new JMenu(com.tawkit.service.localization.Messages.get("app.file"));
-        JMenuItem exitItem = new JMenuItem(com.tawkit.service.localization.Messages.get("app.exit"));
-        exitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
-        exitItem.addActionListener(e -> System.exit(0));
-        fileMenu.add(exitItem);
-
-        JMenu viewMenu = new JMenu(com.tawkit.service.localization.Messages.get("app.view"));
-        JMenuItem fullScreenItem = new JMenuItem(com.tawkit.service.localization.Messages.get("app.fullscreen"));
-        fullScreenItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0));
-        fullScreenItem.addActionListener(e -> toggleFullScreen());
-        viewMenu.add(fullScreenItem);
-        viewMenu.addSeparator();
-        JMenuItem toggle24hItem = new JMenuItem(com.tawkit.service.localization.Messages.get("app.clock"));
-        toggle24hItem.addActionListener(e -> {
-            use24HourMenu = !use24HourMenu;
-            clockPanel.setUse24Hour(use24HourMenu);
-        });
-        viewMenu.add(toggle24hItem);
-
-        JMenu settingsMenu = new JMenu(com.tawkit.service.localization.Messages.get("app.settings"));
-        JMenuItem prefsItem = new JMenuItem(com.tawkit.service.localization.Messages.get("app.preferences"));
-        prefsItem.addActionListener(e -> openSettings());
-        settingsMenu.add(prefsItem);
-
-        JMenu helpMenu = new JMenu(com.tawkit.service.localization.Messages.get("app.help"));
-        JMenuItem aboutItem = new JMenuItem(com.tawkit.service.localization.Messages.get("app.about"));
-        aboutItem.addActionListener(e -> JOptionPane.showMessageDialog(this,
-                "<html><b>Tawkit Desktop</b><br>Free prayer times app<br>Inspired by tawkit.net</html>",
-                "About", JOptionPane.INFORMATION_MESSAGE));
-        helpMenu.add(aboutItem);
-
-        menuBar.add(fileMenu);
-        menuBar.add(viewMenu);
-        menuBar.add(settingsMenu);
-        menuBar.add(helpMenu);
-
-        setJMenuBar(menuBar);
+        screen.applyTheme("night");
     }
 
     private void installKeyBindings() {
-        KeyStroke f11 = KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0);
-        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(f11, "toggleFullScreen");
-        getRootPane().getActionMap().put("toggleFullScreen", new AbstractAction() {
+        JRootPane rp = getRootPane();
+        rp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), "toggleFullScreen");
+        rp.getActionMap().put("toggleFullScreen", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 toggleFullScreen();
             }
         });
-
-        KeyStroke esc = KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0);
-        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(esc, "exitFullScreen");
-        getRootPane().getActionMap().put("exitFullScreen", new AbstractAction() {
+        rp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "exitFullScreen");
+        rp.getActionMap().put("exitFullScreen", new AbstractAction() {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 if (fullScreen) toggleFullScreen();
+            }
+        });
+        rp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                .put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK), "quit");
+        rp.getActionMap().put("quit", new AbstractAction() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                System.exit(0);
             }
         });
     }
@@ -267,9 +139,6 @@ public class MainFrame extends JFrame {
     public void openSettings() {
         if (settingsOpener != null) {
             settingsOpener.run();
-        } else {
-            SettingsDialog dialog = new SettingsDialog(this);
-            dialog.setVisible(true);
         }
     }
 
@@ -278,63 +147,94 @@ public class MainFrame extends JFrame {
         this.settingsOpener = opener;
     }
 
-    // ---- Public update methods (controller calls these) ----
+    // ---------------- Public update methods (controller calls these) ----
 
     public void setMosqueName(String name) {
-        mosqueLabel.setText(name == null || name.isBlank() ? "" : name);
+        screen.setMosqueName(name);
     }
 
+    /** City / coordinates info shown top-left under the weather. */
+    public void setCityInfo(String cityName, double latitude, double longitude) {
+        screen.setCityInfo(cityName, latitude, longitude);
+    }
+
+    private boolean use24HourFlag = false;
+    private boolean secondsFlag = true;
+
     public void setUse24Hour(boolean use24) {
-        clockPanel.setUse24Hour(use24);
+        use24HourFlag = use24;
+        screen.setClockMode(use24HourFlag, secondsFlag);
     }
 
     public void setShowSeconds(boolean show) {
-        clockPanel.setShowSeconds(show);
+        secondsFlag = show;
+        screen.setClockMode(use24HourFlag, secondsFlag);
     }
 
     public void setHijriDate(HijriDate hijri) {
-        datePanel.setHijriDate(hijri);
+        // combined with the Gregorian date in setDate; stored until both known
+        this.pendingHijri = hijri;
+        refreshDate();
     }
 
+    private HijriDate pendingHijri;
+    private LocalDate pendingGregorian;
+
     public void setGregorianDate(LocalDate date) {
-        datePanel.setGregorianDate(date);
+        this.pendingGregorian = date;
+        refreshDate();
+    }
+
+    private void refreshDate() {
+        if (pendingGregorian == null || pendingHijri == null) return;
+        screen.setDate(pendingGregorian, pendingHijri.getDay(),
+                pendingHijri.getMonth(), pendingHijri.getYear());
     }
 
     public void setWeather(WeatherData data) {
-        weatherPanel.setWeather(data);
+        screen.setWeather(data);
     }
 
     public void setPrayerTimes(DailyPrayerTimes times) {
-        prayerTimesPanel.setPrayerTimes(times);
+        screen.setPrayerTimes(times);
     }
 
     public void setHighlightedPrayer(PrayerType type) {
-        prayerTimesPanel.setHighlightedPrayer(type);
-    }
-
-    public PrayerTimesPanel getPrayerTimesPanel() {
-        return prayerTimesPanel;
+        // highlighted by the countdown circle label in this design
     }
 
     public void setIqamaCountdown(String text) {
-        prayerTimesPanel.setIqamaCountdown(text);
+        // iqama countdown is merged into the circle by setNextPrayer
     }
 
     public void setNextPrayer(String name, String countdown, double progress, String iqamaInfo) {
-        nextPrayerPanel.setPrayerName(name);
-        nextPrayerPanel.setCountdown(countdown);
-        nextPrayerPanel.setProgress(progress);
-        nextPrayerPanel.setIqamaInfo(iqamaInfo);
+        boolean iqamaActive = iqamaInfo != null && !iqamaInfo.isBlank();
+        String digits;
+        String label;
+        if (iqamaActive) {
+            digits = iqamaInfo.replace("Iqama", "").trim();
+            label = "Iqama";
+        } else {
+            digits = countdown == null ? "--:--" : countdown;
+            // H:MM:SS -> H:MM (reference shows h:mm in the circle)
+            int firstColon = digits.indexOf(':');
+            if (firstColon >= 0) {
+                int secondColon = digits.indexOf(':', firstColon + 1);
+                if (secondColon > 0) digits = digits.substring(0, secondColon);
+            }
+            label = name == null || name.isBlank() ? "Next Prayer" : name;
+        }
+        screen.setCountdown(digits, label, progress);
     }
 
     public void setContentItems(List<ContentItem> items) {
-        contentPanel.setItems(items);
-        contentPanel.setRotationSeconds(18);
-        showContent();
+        boolean arabic = "ar".equalsIgnoreCase(
+                com.tawkit.service.localization.Messages.getLocale().getLanguage());
+        screen.setVerses(items, arabic);
     }
 
     public void setRotationSeconds(int seconds) {
-        contentPanel.setRotationSeconds(seconds);
+        screen.setRotationSeconds(seconds);
     }
 
     public void setSlides(List<com.tawkit.model.content.Slide> slides) {
@@ -342,21 +242,21 @@ public class MainFrame extends JFrame {
     }
 
     public void showSlides() {
-        contentCards.show(contentHolder, "slides");
+        cards.show(cardHolder, "slides");
         slidesPanel.setActive(true);
     }
 
     public void showContent() {
         slidesPanel.setActive(false);
-        contentCards.show(contentHolder, "content");
+        cards.show(cardHolder, "screen");
     }
 
     public void setTickerMessages(List<String> messages) {
-        tickerPanel.setMessages(messages);
+        screen.setFooterTexts(messages);
     }
 
     public void setDimmed(boolean dimmed) {
-        if (alertLabel != null && !alertLabel.getText().isEmpty()) {
+        if (dimmed && alertLabel.getText() != null && !alertLabel.getText().isEmpty()) {
             return; // alert display has priority
         }
         getGlassPane().setVisible(dimmed);
@@ -371,73 +271,20 @@ public class MainFrame extends JFrame {
     }
 
     public void applyTheme(String theme) {
-        ((BackgroundPanel) root).setTheme(theme);
-        getContentPane().revalidate();
-        getContentPane().repaint();
+        screen.applyTheme(theme);
     }
 
     public void applyCustomBackground(String path) {
-        ((BackgroundPanel) root).setCustomImage(path);
-        getContentPane().revalidate();
-        getContentPane().repaint();
+        screen.applyCustomImage(path);
     }
 
-    /** RTL for Arabic; LTR otherwise. */
+    /** RTL for Arabic; LTR otherwise (screen handles text direction internally). */
     public void setLanguage(String code) {
-        Locale locale = "ar".equalsIgnoreCase(code)
-                ? new Locale("ar") : new Locale(code == null ? "en" : code);
-        setComponentOrientation(ComponentOrientation.getOrientation(locale));
+        // The screen renders fixed-language content per the reference design;
+        // verse translation/Arabic selection happens in setContentItems.
     }
 
-    private static final class BackgroundPanel extends JPanel {
-        private String theme = "night";
-        private transient BufferedImage customImage;
-
-        BackgroundPanel() {
-            setBackground(BG_COLOR);
-            setOpaque(true);
-        }
-
-        void setTheme(String t) {
-            this.theme = t == null ? "night" : t;
-            this.customImage = null;
-            repaint();
-        }
-
-        void setCustomImage(String path) {
-            if (path == null || path.isBlank()) return;
-            try {
-                customImage = ImageIO.read(new File(path));
-            } catch (Exception e) {
-                System.err.println("[Background] cannot load " + path);
-            }
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (customImage != null) {
-                Graphics2D g2 = (Graphics2D) g;
-                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-                        RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-                double scale = Math.max(getWidth() / (double) customImage.getWidth(),
-                        getHeight() / (double) customImage.getHeight());
-                int w = (int) (customImage.getWidth() * scale);
-                int h = (int) (customImage.getHeight() * scale);
-                g2.drawImage(customImage, (getWidth() - w) / 2, (getHeight() - h) / 2, w, h, null);
-                return;
-            }
-            GradientPaint paint = switch (theme) {
-                case "green" -> new GradientPaint(0, 0, new Color(6, 34, 22),
-                        getWidth(), getHeight(), new Color(12, 55, 35));
-                case "blue" -> new GradientPaint(0, 0, new Color(8, 20, 45),
-                        getWidth(), getHeight(), new Color(18, 45, 85));
-                default -> new GradientPaint(0, 0, new Color(6, 12, 26),
-                        getWidth(), getHeight(), new Color(16, 30, 55));
-            };
-            ((Graphics2D) g).setPaint(paint);
-            g.fillRect(0, 0, getWidth(), getHeight());
-        }
+    public TawkitScreen getScreen() {
+        return screen;
     }
 }

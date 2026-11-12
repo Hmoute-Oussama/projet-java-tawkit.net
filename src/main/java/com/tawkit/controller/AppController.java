@@ -84,8 +84,14 @@ public class AppController implements PrayerScheduler.Listener, WeatherService.L
     private void applySettingsToFrame() {
         com.tawkit.service.localization.Messages.setLanguage(settings.getLanguage());
         frame.setTitle(com.tawkit.service.localization.Messages.get("app.title"));
-        frame.getPrayerTimesPanel().refreshNames();
         frame.setMosqueName(settings.getMosqueName());
+
+        var loc = settings.getLocation();
+        if (loc != null) {
+            frame.setCityInfo(loc.getName(), loc.getLatitude(), loc.getLongitude());
+        } else {
+            frame.setCityInfo("", 0, 0);
+        }
         frame.setUse24Hour(settings.isUse24HourClock());
         frame.setShowSeconds(settings.isShowSeconds());
         frame.setLanguage(settings.getLanguage());
