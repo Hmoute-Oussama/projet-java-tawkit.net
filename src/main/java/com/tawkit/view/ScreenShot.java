@@ -26,7 +26,7 @@ public final class ScreenShot {
                 : System.getProperty("java.io.tmpdir") + File.separator + "tawkit-screen.png";
 
         TawkitScreen screen = new TawkitScreen();
-        screen.setSize(1920, 1080);
+        screen.setSize(1096, 631);
 
         // Reference sample data
         screen.setDate(LocalDate.of(2026, 5, 4), 17, 11, 1447);
@@ -49,7 +49,7 @@ public final class ScreenShot {
         times.put(PrayerType.ISHA, new PrayerEntry(PrayerType.ISHA, LocalTime.of(20, 18), null));
         screen.setPrayerTimes(times);
 
-        BufferedImage img = new BufferedImage(1920, 1080, BufferedImage.TYPE_INT_RGB);
+        BufferedImage img = new BufferedImage(1096, 631, BufferedImage.TYPE_INT_RGB);
         java.awt.Graphics2D g = img.createGraphics();
         screen.paint(g);
         g.dispose();

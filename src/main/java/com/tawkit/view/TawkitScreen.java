@@ -172,7 +172,9 @@ public class TawkitScreen extends JComponent {
         verseLabels.clear();
         if (items != null) {
             for (ContentItem item : items) {
-                String text = arabic ? item.getArabicText() : item.getTranslation();
+                // The central calligraphy is Arabic-only per the reference design,
+                // regardless of the interface language.
+                String text = item.getArabicText();
                 if (text == null || text.isBlank()) continue;
                 verseLines.add(text);
                 String ref = item.getReference() == null ? "" : item.getReference();
@@ -273,8 +275,8 @@ public class TawkitScreen extends JComponent {
         paintHeaderLeft(g2, vw, vh);
 
         // ---- 3. Header date (top center) ----
-        g2.setFont(TawkitTheme.serif(Font.PLAIN, (float) (2.2 * vw)));
-        drawTextShadowed(g2, dateText, (float) (w / 2), (float) (5.4 * vh), TextAnchor.CENTER,
+        g2.setFont(TawkitTheme.serif(Font.PLAIN, (float) (1.9 * vw)));
+        drawTextShadowed(g2, dateText, (float) (w / 2), (float) (5.0 * vh), TextAnchor.CENTER,
                 TawkitTheme.WARM_WHITE, 0.12f * (float) vw);
 
         // ---- 4. Left decorative emblem ----
@@ -284,9 +286,9 @@ public class TawkitScreen extends JComponent {
         paintCountdownCircle(g2, vw, vh);
 
         // ---- 6. Mosque name above clock (Arabic) ----
-        g2.setFont(TawkitTheme.arabic(3.0f * (float) vw));
-        drawTextShadowed(g2, mosqueName, (float) (w / 2), (float) (17.5 * vh), TextAnchor.CENTER,
-                TawkitTheme.WARM_WHITE, 0.25f * (float) vw);
+        g2.setFont(TawkitTheme.arabic(2.6f * (float) vw));
+        drawTextShadowed(g2, mosqueName, (float) (w / 2), (float) (17.0 * vh), TextAnchor.CENTER,
+                TawkitTheme.WARM_WHITE, 0.10f * (float) vw);
 
         // ---- 7. Main digital clock ----
         paintClock(g2, vw, vh);
@@ -299,14 +301,14 @@ public class TawkitScreen extends JComponent {
 
         // ---- 10. Footer ----
         g2.setFont(TawkitTheme.arabic(2.6f * (float) vw));
-        drawTextShadowed(g2, currentFooter(), (float) (w / 2), (float) (95.5 * vh), TextAnchor.CENTER,
+        drawTextShadowed(g2, currentFooter(), (float) (w / 2), (float) (94.0 * vh), TextAnchor.CENTER,
                 TawkitTheme.WARM_WHITE, 0.18f * (float) vw);
 
         g2.setFont(TawkitTheme.serif(Font.PLAIN, 0.95f * (float) vw));
         drawTextShadowed(g2, "TAWKIT DESKTOP", (float) (1.2 * vw), (float) (98.6 * vh), TextAnchor.LEFT,
-                withAlpha(TawkitTheme.GRAY, 0.65f), 0);
+                withAlpha(TawkitTheme.GRAY, 0.55f), 0);
         drawTextShadowed(g2, "JAVA SWING EDITION", (float) (w - 1.2 * vw), (float) (98.6 * vh), TextAnchor.RIGHT,
-                withAlpha(TawkitTheme.GRAY, 0.65f), 0);
+                withAlpha(TawkitTheme.GRAY, 0.55f), 0);
 
         g2.dispose();
     }
@@ -331,7 +333,7 @@ public class TawkitScreen extends JComponent {
         return switch (theme) {
             case "green" -> new Color(0, 20, 8, 175);
             case "blue" -> new Color(0, 10, 30, 175);
-            default -> new Color(0, 0, 0, 153); // rgba(0,0,0,0.60)
+            default -> new Color(0, 0, 0, 185); // dark cinematic overlay (reference-matched)
         };
     }
 
@@ -350,17 +352,17 @@ public class TawkitScreen extends JComponent {
         }
 
         // Temperature + sun icon
-        float tempY = (float) (7.0 * vh);
-        g2.setFont(TawkitTheme.serif(Font.BOLD, 2.0f * (float) vw));
+        float tempY = (float) (7.4 * vh);
+        g2.setFont(TawkitTheme.serif(Font.BOLD, 1.9f * (float) vw));
         drawText(g2, tempText, x, tempY, TextAnchor.LEFT, TawkitTheme.WARM_WHITE);
-        paintSun(g2, x + 5.2f * (float) vw, tempY - 0.7f * (float) vh, 1.0f * (float) vw);
+        paintSun(g2, x + 5.0f * (float) vw, tempY - 0.7f * (float) vh, 0.95f * (float) vw);
 
         // Coordinates
-        g2.setFont(TawkitTheme.serif(Font.PLAIN, 1.15f * (float) vw));
-        drawText(g2, coordsText, x, (float) (9.0 * vh), TextAnchor.LEFT, TawkitTheme.GRAY);
+        g2.setFont(TawkitTheme.serif(Font.PLAIN, 1.05f * (float) vw));
+        drawText(g2, coordsText, x, (float) (11.0 * vh), TextAnchor.LEFT, TawkitTheme.GRAY);
 
         // Small Jordan-style flag
-        paintFlag(g2, x, (float) (10.2 * vh), (float) (2.2 * vw), (float) (1.4 * vw));
+        paintFlag(g2, x, (float) (12.8 * vh), (float) (2.2 * vw), (float) (1.4 * vw));
     }
 
     /** Small sun: yellow disc with rays (drawn, never a tofu-box emoji). */
@@ -407,8 +409,8 @@ public class TawkitScreen extends JComponent {
 
     private void paintEmblem(Graphics2D g2, double vw, double vh) {
         double cx = 11.5 * vw;
-        double cy = 40 * vh;
-        double r = 10.5 * vw;
+        double cy = 33 * vh;
+        double r = 8 * vw;
 
         g2.setColor(new Color(8, 8, 8, 140));
         g2.fill(new Ellipse2D.Double(cx - r, cy - r, r * 2, r * 2));
@@ -455,9 +457,9 @@ public class TawkitScreen extends JComponent {
     // --------------------------------------------------- countdown circle
 
     private void paintCountdownCircle(Graphics2D g2, double vw, double vh) {
-        double cx = 86.5 * vw;
-        double cy = 30 * vh;
-        double r = 9.5 * vw;
+        double cx = 87.5 * vw;
+        double cy = 27 * vh;
+        double r = 7.75 * vw;
 
         // Dark interior
         g2.setColor(new Color(5, 5, 5, 165));
@@ -469,23 +471,14 @@ public class TawkitScreen extends JComponent {
         g2.draw(new Ellipse2D.Double(cx - r, cy - r, r * 2, r * 2));
         g2.draw(new Ellipse2D.Double(cx - r * 0.86, cy - r * 0.86, r * 1.72, r * 1.72));
 
-        // Progress arc (golden, from top)
-        if (countdownProgress > 0.005) {
-            g2.setColor(TawkitTheme.GOLDEN_BEIGE);
-            g2.setStroke(new BasicStroke(Math.max(2f, (float) (r * 0.035)),
-                    BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2.draw(new Arc2D.Double(cx - r, cy - r, r * 2, r * 2, 90,
-                    -360.0 * countdownProgress, Arc2D.OPEN));
-        }
-
         // Digits
-        g2.setFont(TawkitTheme.serif(Font.BOLD, 5.0f * (float) vw));
-        drawTextShadowed(g2, countdownDigits, (float) cx, (float) (cy + 0.6 * vh), TextAnchor.CENTER,
-                TawkitTheme.GOLDEN_BEIGE, 0.18f * (float) vw);
+        g2.setFont(TawkitTheme.serif(Font.BOLD, 3.2f * (float) vw));
+        drawTextShadowed(g2, countdownDigits, (float) cx, (float) (cy + 0.4 * vh), TextAnchor.CENTER,
+                TawkitTheme.GOLDEN_BEIGE, 0.14f * (float) vw);
 
         // Label
-        g2.setFont(TawkitTheme.serif(Font.PLAIN, 1.4f * (float) vw));
-        drawTextShadowed(g2, countdownLabel, (float) cx, (float) (cy + r * 0.55), TextAnchor.CENTER,
+        g2.setFont(TawkitTheme.serif(Font.PLAIN, 1.15f * (float) vw));
+        drawTextShadowed(g2, countdownLabel, (float) cx, (float) (cy + r * 0.5), TextAnchor.CENTER,
                 TawkitTheme.GRAY, 0);
     }
 
@@ -506,31 +499,31 @@ public class TawkitScreen extends JComponent {
         String digits = hour + ":" + minutes;
         String seconds = showSeconds ? String.format("%02d", now.getSecond()) : "";
 
-        // Clock digits: centered slightly left of center, top ~21% — ~10vw
-        float fontSize = 10.0f * (float) vw;
+        // Clock digits: centered horizontally, top ~22% — ~8vw
+        float fontSize = 8.0f * (float) vw;
         g2.setFont(TawkitTheme.serif(Font.BOLD, fontSize));
         FontMetrics fm = g2.getFontMetrics();
-        float centerX = (float) (getWidth() * 0.5 - 1.5 * vw);
-        float baselineY = (float) (21.0 * vh) + fm.getAscent() * 0.9f;
+        float centerX = (float) (getWidth() / 2);
+        float baselineY = (float) (22.0 * vh) + fm.getAscent() * 0.9f;
         float digitsWidth = fm.stringWidth(digits);
         drawTextShadowed(g2, digits, centerX, baselineY, TextAnchor.CENTER,
-                TawkitTheme.WARM_WHITE, 0.3f * (float) vw);
+                TawkitTheme.WARM_WHITE, 0.28f * (float) vw);
 
         // Seconds immediately right of the digits
         if (!seconds.isEmpty()) {
-            g2.setFont(TawkitTheme.serif(Font.BOLD, 4.2f * (float) vw));
+            g2.setFont(TawkitTheme.serif(Font.BOLD, 3.0f * (float) vw));
             FontMetrics sm = g2.getFontMetrics();
-            float secX = centerX + digitsWidth / 2 + sm.stringWidth("00") / 2 + 1.4f * (float) vw;
+            float secX = centerX + digitsWidth / 2 + sm.stringWidth("00") / 2 + 1.1f * (float) vw;
             drawTextShadowed(g2, seconds, secX, baselineY - sm.getAscent() * 0.25f,
-                    TextAnchor.CENTER, TawkitTheme.WARM_WHITE, 0.15f * (float) vw);
+                    TextAnchor.CENTER, TawkitTheme.WARM_WHITE, 0.12f * (float) vw);
         }
 
         // AM / PM below the seconds
         if (!ampm.isEmpty()) {
-            g2.setFont(TawkitTheme.serif(Font.PLAIN, 3.0f * (float) vw));
+            g2.setFont(TawkitTheme.serif(Font.PLAIN, 2.4f * (float) vw));
             FontMetrics am = g2.getFontMetrics();
-            float secX = centerX + digitsWidth / 2 + 1.4f * (float) vw + am.stringWidth("00") / 2;
-            drawTextShadowed(g2, ampm, secX, baselineY + 3.6f * (float) vh, TextAnchor.CENTER,
+            float secX = centerX + digitsWidth / 2 + 1.1f * (float) vw + am.stringWidth("00") / 2;
+            drawTextShadowed(g2, ampm, secX, baselineY + 3.0f * (float) vh, TextAnchor.CENTER,
                     TawkitTheme.GOLDEN_BEIGE, 0.1f * (float) vw);
         }
     }
@@ -544,13 +537,14 @@ public class TawkitScreen extends JComponent {
         String label = verseLabels.isEmpty() ? "" : verseLabels.get(idx % verseLabels.size());
 
         boolean arabicScript = text.codePoints().anyMatch(cp -> cp >= 0x0600 && cp <= 0x06FF);
-        float size = arabicScript ? 3.8f * (float) vw : 2.4f * (float) vw;
-        g2.setFont(arabicScript ? TawkitTheme.arabicBold(size) : TawkitTheme.serif(Font.PLAIN, size));
+        float size = arabicScript ? 3.5f * (float) vw : 2.4f * (float) vw;
+        // Amiri Regular (not Bold) — Bold collides the vowel marks at this size
+        g2.setFont(arabicScript ? TawkitTheme.arabic(size) : TawkitTheme.serif(Font.PLAIN, size));
 
         // Wrap into at most 2 lines within 92% width
         List<String> lines = wrap(g2, text, (float) (92 * vw));
         float lineHeight = size * 1.55f;
-        float startY = (float) (50 * vh);
+        float startY = (float) (47 * vh);
 
         for (int i = 0; i < lines.size(); i++) {
             String line = lines.get(i);
@@ -559,7 +553,7 @@ public class TawkitScreen extends JComponent {
                 line = "﴿" + line + "﴾";
             }
             drawTextShadowed(g2, line, (float) (getWidth() / 2), y, TextAnchor.CENTER,
-                    TawkitTheme.COPPER_GOLD, 0.25f * (float) vw);
+                    TawkitTheme.COPPER_GOLD, 0.08f * (float) vw);
         }
 
         // Small "Surat X" label, subtle, above the verse —
@@ -611,17 +605,17 @@ public class TawkitScreen extends JComponent {
 
             // Temperature (interpolated from forecast) — small, golden
             g2.setFont(TawkitTheme.serif(Font.PLAIN, 1.7f * (float) vw));
-            drawTextShadowed(g2, prayerTemp(type, vw), (float) colCenter, (float) (64.5 * vh),
+            drawTextShadowed(g2, prayerTemp(type, vw), (float) colCenter, (float) (61.0 * vh),
                     TextAnchor.CENTER, TawkitTheme.GOLDEN_BEIGE, 0.1f * (float) vw);
 
             // Name — serif, warm white
             g2.setFont(TawkitTheme.serif(Font.PLAIN, 2.3f * (float) vw));
-            drawTextShadowed(g2, prayerName(type), (float) colCenter, (float) (69.0 * vh),
+            drawTextShadowed(g2, prayerName(type), (float) colCenter, (float) (65.5 * vh),
                     TextAnchor.CENTER, TawkitTheme.WARM_WHITE, 0.12f * (float) vw);
 
             // Time — large bold white
             g2.setFont(TawkitTheme.serif(Font.BOLD, 4.2f * (float) vw));
-            drawTextShadowed(g2, prayerTime(type), (float) colCenter, (float) (75.5 * vh),
+            drawTextShadowed(g2, prayerTime(type), (float) colCenter, (float) (71.5 * vh),
                     TextAnchor.CENTER, Color.WHITE, 0.18f * (float) vw);
         }
     }
