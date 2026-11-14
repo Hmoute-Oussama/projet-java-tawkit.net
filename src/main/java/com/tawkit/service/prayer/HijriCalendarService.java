@@ -1,9 +1,9 @@
 package com.tawkit.service.prayer;
 
 import com.tawkit.model.common.HijriDate;
+import com.tawkit.model.common.HijriMonthNames;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -12,12 +12,6 @@ import java.util.Locale;
  * why an optional manual offset (in days) is supported, like Tawkit does.
  */
 public final class HijriCalendarService {
-
-    /** Transliterated Arabic month names. */
-    private static final List<String> MONTHS = List.of(
-            "Muharram", "Safar", "Rabi al-Awwal", "Rabi al-Thani",
-            "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
-            "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah");
 
     private int offsetDays = 0;
 
@@ -34,11 +28,11 @@ public final class HijriCalendarService {
         int jdn = gregorianToJdn(date.getYear(), date.getMonthValue(), date.getDayOfMonth()) + offsetDays;
         int[] dmy = jdnToIslamic(jdn);
         int day = dmy[0], month = dmy[1], year = dmy[2];
-        String name = (month >= 1 && month <= 12) ? MONTHS.get(month - 1) : "?";
-        return new HijriDate(day, month, year, name);
+        String name = HijriMonthNames.english(month);
+        return new HijriDate(day, month, year, name.isEmpty() ? "?" : name);
     }
 
-    /** Localized month name, e.g. for FR/AR UIs. */
+    /** Localized month name, e.g. for FR/AR UIs (English comes from {@link HijriMonthNames}). */
     public String monthName(int month, Locale locale) {
         if (month < 1 || month > 12) return "";
         if ("ar".equals(locale.getLanguage())) {
@@ -52,7 +46,7 @@ public final class HijriCalendarService {
                     "Dhou al-Qi'da", "Dhou al-Hijja"};
             return fr[month - 1];
         }
-        return MONTHS.get(month - 1);
+        return HijriMonthNames.english(month);
     }
 
     /**

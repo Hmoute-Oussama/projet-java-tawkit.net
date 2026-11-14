@@ -9,6 +9,7 @@ import com.tawkit.model.settings.AppSettings;
 import com.tawkit.model.weather.WeatherData;
 import com.tawkit.service.audio.AudioService;
 import com.tawkit.service.content.ContentService;
+import com.tawkit.service.format.TimeText;
 import com.tawkit.service.prayer.HijriCalendarService;
 import com.tawkit.service.prayer.PrayerScheduler;
 import com.tawkit.service.prayer.PrayerTimeCalculator;
@@ -30,21 +31,32 @@ import java.util.List;
 public class AppController implements PrayerScheduler.Listener, WeatherService.Listener {
 
     private final MainFrame frame;
-    private final SettingsService settingsService = new SettingsService();
+    private final SettingsService settingsService;
     private final AppSettings settings;
-    private final AudioService audio = new AudioService();
-    private final ContentService content = new ContentService();
-    private final HijriCalendarService hijri = new HijriCalendarService();
-    private final PrayerTimeCalculator calculator = new PrayerTimeCalculator();
-    private final ReminderService reminders = new ReminderService();
-    private final WeatherService weatherService = new WeatherService(this);
+    private final AudioService audio;
+    private final ContentService content;
+    private final HijriCalendarService hijri;
+    private final PrayerTimeCalculator calculator;
+    private final ReminderService reminders;
+    private final WeatherService weatherService;
 
     private PrayerScheduler scheduler;
     private boolean showingAzkar = false;
     private boolean preFajrAlertFired = false;
 
+    /**
+     * Composition root: all services are created here and injected through
+     * the constructor — no hidden statics, everything replaceable for tests.
+     */
     public AppController(MainFrame frame) {
         this.frame = frame;
+        this.settingsService = new SettingsService();
+        this.audio = new AudioService();
+        this.content = new ContentService();
+        this.hijri = new HijriCalendarService();
+        this.calculator = new PrayerTimeCalculator();
+        this.reminders = new ReminderService();
+        this.weatherService = new WeatherService(this);
         this.settings = settingsService.load();
         settingsService.save(settings); // normalize defaults to disk
     }
@@ -154,7 +166,7 @@ public class AppController implements PrayerScheduler.Listener, WeatherService.L
         frame.setHighlightedPrayer(snapshot.nextPrayer);
 
         if (snapshot.state == PrayerScheduler.State.IQAMA_COUNTDOWN && snapshot.secondsToIqama >= 0) {
-            frame.setIqamaCountdown("Iqama in " + formatMMSS(snapshot.secondsToIqama));
+            frame.setIqamaCountdown("Iqama in " + TimeText.mmss(snapshot.secondsToIqama));
         } else {
             frame.setIqamaCountdown("");
         }
@@ -162,9 +174,9 @@ public class AppController implements PrayerScheduler.Listener, WeatherService.L
         // Next-prayer ring
         String name = snapshot.nextPrayer != null ? snapshot.nextPrayer.getDisplayName() : "";
         String countdown = snapshot.secondsToNextAdhan >= 0
-                ? formatHHMMSS(snapshot.secondsToNextAdhan) : "--:--:--";
+                ? TimeText.hhmmss(snapshot.secondsToNextAdhan) : "--:--:--";
         String iqamaInfo = snapshot.state == PrayerScheduler.State.IQAMA_COUNTDOWN
-                ? "Iqama " + formatMMSS(snapshot.secondsToIqama) : "";
+                ? "Iqama " + TimeText.mmss(snapshot.secondsToIqama) : "";
         frame.setNextPrayer(name, countdown, ringProgress(snapshot), iqamaInfo);
 
         // Dimming during prayer
@@ -275,19 +287,6 @@ public class AppController implements PrayerScheduler.Listener, WeatherService.L
         if (interval <= 0) return 0;
         double elapsed = interval - snapshot.secondsToNextAdhan;
         return Math.max(0.0, Math.min(1.0, elapsed / interval));
-    }
-
-    private static String formatHHMMSS(long totalSeconds) {
-        long h = totalSeconds / 3600;
-        long m = (totalSeconds % 3600) / 60;
-        long s = totalSeconds % 60;
-        return String.format("%d:%02d:%02d", h, m, s);
-    }
-
-    private static String formatMMSS(long totalSeconds) {
-        long m = totalSeconds / 60;
-        long s = totalSeconds % 60;
-        return String.format("%d:%02d", m, s);
     }
 
     public ContentService getContentService() {

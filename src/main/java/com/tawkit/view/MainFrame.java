@@ -5,6 +5,7 @@ import com.tawkit.model.content.ContentItem;
 import com.tawkit.model.prayer.DailyPrayerTimes;
 import com.tawkit.model.prayer.PrayerType;
 import com.tawkit.model.weather.WeatherData;
+import com.tawkit.service.format.TimeText;
 
 import javax.swing.*;
 import java.awt.*;
@@ -216,12 +217,8 @@ public class MainFrame extends JFrame {
             label = "Iqama";
         } else {
             digits = countdown == null ? "--:--" : countdown;
-            // H:MM:SS -> H:MM (reference shows h:mm in the circle)
-            int firstColon = digits.indexOf(':');
-            if (firstColon >= 0) {
-                int secondColon = digits.indexOf(':', firstColon + 1);
-                if (secondColon > 0) digits = digits.substring(0, secondColon);
-            }
+            // H:MM:SS -> H:MM (the circle shows h:mm in the reference design)
+            digits = TimeText.withoutSeconds(digits);
             label = name == null || name.isBlank() ? "Next Prayer" : name;
         }
         screen.setCountdown(digits, label, progress);
